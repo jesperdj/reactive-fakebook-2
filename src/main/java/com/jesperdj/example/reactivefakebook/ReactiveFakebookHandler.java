@@ -4,12 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static org.springframework.web.reactive.function.server.ServerResponse.created;
 import static org.springframework.web.reactive.function.server.ServerResponse.notFound;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
@@ -43,7 +45,9 @@ public class ReactiveFakebookHandler {
                 .bodyToMono(FakePost.class)
                 .doOnNext(post -> post.setTimestamp(LocalDateTime.now()))
                 .flatMap(repository::save)
-                .flatMap(post -> ok().contentType(APPLICATION_JSON).body(fromObject(post)));
+                .flatMap(post ->
+                        created(UriComponentsBuilder.fromPath("/posts/{id}").buildAndExpand(post.getId()).toUri())
+                                .contentType(APPLICATION_JSON).body(fromObject(post)));
     }
 
     public Mono<ServerResponse> update(ServerRequest request) {
