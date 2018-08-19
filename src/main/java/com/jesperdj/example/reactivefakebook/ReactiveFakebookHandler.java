@@ -62,7 +62,6 @@ public class ReactiveFakebookHandler {
                 .map(tuple -> {
                     FakePost existingPost = tuple.getT1();
                     FakePost updatedPost = tuple.getT2();
-
                     existingPost.setTimestamp(LocalDateTime.now());
                     existingPost.setContent(updatedPost.getContent());
                     return existingPost;
