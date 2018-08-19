@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -45,9 +46,11 @@ public class ReactiveFakebookHandler {
                 .bodyToMono(FakePost.class)
                 .doOnNext(post -> post.setTimestamp(LocalDateTime.now()))
                 .flatMap(repository::save)
-                .flatMap(post ->
-                        created(UriComponentsBuilder.fromPath("/posts/{id}").buildAndExpand(post.getId()).toUri())
-                                .contentType(APPLICATION_JSON).body(fromObject(post)));
+                .flatMap(post -> created(uriForPost(post.getId())).contentType(APPLICATION_JSON).body(fromObject(post)));
+    }
+
+    private URI uriForPost(String id) {
+        return UriComponentsBuilder.fromPath("/posts/{id}").buildAndExpand(id).toUri();
     }
 
     public Mono<ServerResponse> update(ServerRequest request) {
